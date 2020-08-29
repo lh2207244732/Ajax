@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>封装ajax函数</title>
+</head>
+
+<body>
+    <button id="btn1">Ajax GET获取数据</button>
+    <button id="btn2">Ajax POST添加数据</button>
+</body>
+<script>
+    // 获取点击按钮
+    var btn1 = document.getElementById('btn1')
+    var btn2 = document.getElementById('btn2')
+        // 设置ajax函数
+    function ajax(options) {
+        var method = options.method || 'GET'
+        method = method.toUpperCase()
+        var url = options.url || ''
+        var data = options.data
+        var mime;
+        // 创建ajax对象
+        var xhr = new XMLHttpRequest()
+            // 判断请求类型
+        if (method == 'GET') {
+            // 遍历对象
+            var query = ''
+            for (var key in data) {
+                query += key + '=' + data[key] + '&'
+            }
+            query = query.slice(0, -1)
+            url = '?' + query
+            data = ''
+            mime = 'application/x-www-form-urlencoded'
+        } else if (method == 'POST') {
+            data = JSON.stringify(data)
+            mime = 'application/json'
+        }
+        //1.初始化，设置请求方式，URL地址，是否异步
+        xhr.open(method, url, true)
+            //2.设置请求头，告诉服务器请求数据类型
+        xhr.setRequestHeader('Content-Type', mime)
+            //3.发送数据
+        xhr.send(data)
+            //4.监听事件，处理服务器返回数据
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    try {
+                        var obj = JSON.parse(xhr.responseText)
+                        typeof options.success == 'function' ? options.success(obj) : null
+                    } catch (e) {
+                        typeof options.error == 'function' ? options.error(xhr.status, e) : null
+                    }
+                } else {
+                    typeof options.error == 'function' ? options.error(xhr.status) : null
+
+                }
+            }
+        }
+    }
+    // 绑定点击事件
+    btn1.onclick = function() {
+        var options = {
+            method: 'GET',
+            url: 'http://127.0.0.1:3000/getDate',
+            data: {
+                name: '李四',
+                age: 20,
+                city: '杭州'
+            },
+            success: function(data) {
+                console.log(data)
+            },
+            error: function(status, e) {
+                console.log(status, e)
+            }
+        }
+        ajax(options)
+
+    }
+    btn2.onclick = function() {
+        var options = {
+            method: 'POST',
+            url: 'http://127.0.0.1:3000/addDate',
+            data: {
+                name: '张三',
+                age: 18,
+                city: '北京'
+            },
+            success: function(data) {
+                console.log(data)
+            },
+            error: function(status, e) {
+                console.log(status, e)
+            }
+        }
+        ajax(options)
+    }
+</script>
+
+</html>
