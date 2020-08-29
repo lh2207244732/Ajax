@@ -42,7 +42,7 @@
         //1.初始化，设置请求方式，URL地址，是否异步
         xhr.open(method, url, true)
             //2.设置请求头，告诉服务器请求数据类型
-        xhr.setRequestHeader('Content-Type', mime)
+        mime ? xhr.setRequestHeader('Content-Type', mime) : null
             //3.发送数据
         xhr.send(data)
             //4.监听事件，处理服务器返回数据
